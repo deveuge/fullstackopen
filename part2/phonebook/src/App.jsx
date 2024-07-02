@@ -47,12 +47,16 @@ const App = () => {
         number: newNumber,
       };
 
-      PersonService.create(personObject).then((returnedPerson) => {
-        setPersons(persons.concat(returnedPerson));
-        setNewName("");
-        setNewNumber("");
-        setMessage(`Added ${newName}`, "success");
-      });
+      PersonService.create(personObject)
+        .then((returnedPerson) => {
+          setPersons(persons.concat(returnedPerson));
+          setNewName("");
+          setNewNumber("");
+          setMessage(`Added ${newName}`, "success");
+        })
+        .catch((error) => {
+          setMessage(`${error.response.data.error}`, "error");
+        });
     } else {
       if (existingPerson.number === newNumber) {
         setMessage(`${newName} is already added to phonebook`, "error");
@@ -60,7 +64,15 @@ const App = () => {
         if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
           PersonService.update(existingPerson.id, { ...existingPerson, number: newNumber })
             .then((returnedPerson) => {
-              setPersons(persons.map((p) => (p.id !== existingPerson.id ? p : returnedPerson)));
+              setPersons(
+                persons.map((p) => {
+                  var person = p.id !== existingPerson.id ? p : returnedPerson;
+                  if (p.id == existingPerson.id) {
+                    person.number = newNumber;
+                  }
+                  return person;
+                })
+              );
               setNewName("");
               setNewNumber("");
               setMessage(`Modified ${newName}`, "success");

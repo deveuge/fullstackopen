@@ -8,7 +8,16 @@ blogsRouter.get('/', (request, response) => {
 })
 
 blogsRouter.post('/', (request, response, next) => {
-  const blog = new Blog(request.body)
+  const body = request.body
+
+  if (!body.title || !body.url) {
+    return response.status(400).json({
+      error: 'Title or URL missing'
+    })
+  }
+
+  body.likes = body.likes || 0
+  const blog = new Blog(body)
 
   blog
     .save()
